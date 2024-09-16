@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"log"
+	"log-ingester/internal/db"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -10,7 +11,7 @@ import (
 
 type KafkaConsumer struct {
 	consumer *kafka.Consumer
-	topic    string
+	db       *db.MongoDB
 }
 
 type Consumer interface {
@@ -18,7 +19,7 @@ type Consumer interface {
 	Close() error
 }
 
-func NewKafkaConsumer(broker string, topic string, groupID string, topics []string) (*KafkaConsumer, error) {
+func NewKafkaConsumer(broker string, groupID string, topics []string, db *db.MongoDB) (*KafkaConsumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": broker,
 		"group.id":          groupID,
@@ -35,7 +36,7 @@ func NewKafkaConsumer(broker string, topic string, groupID string, topics []stri
 
 	return &KafkaConsumer{
 		consumer: c,
-		topic:    topic,
+		db:       db,
 	}, nil
 }
 
