@@ -3,8 +3,10 @@ package db
 import (
 	"context"
 	"log"
+	"log-ingester/config"
 	"time"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -12,15 +14,16 @@ import (
 
 type MongoDB struct {
 	MongoClient    *mongo.Client
+	DbName         string
 	CollectionName string
 }
 
 type Repository interface {
-	InsertToDB(ctx context.Context) error
+	InsertLogToDB(ctx context.Context) error
 }
 
-func ConnectToMongoDB(ctx context.Context, uri string, collName string) (*MongoDB, error) {
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+func ConnectToMongoDB(ctx context.Context, config *config.Config) (*MongoDB, error) {
+	client, err := mongo.Connect(options.Client().ApplyURI(config.MongoDBURI))
 	if err != nil {
 		return nil, err
 	}
@@ -36,6 +39,19 @@ func ConnectToMongoDB(ctx context.Context, uri string, collName string) (*MongoD
 
 	return &MongoDB{
 		MongoClient:    client,
-		CollectionName: collName,
+		CollectionName: config.CollectionName,
+		DbName:         config.DBName,
 	}, nil
+}
+
+func (m *MongoDB) InsertLogToDB(ctx context.Context, data string) error {
+	collection := m.MongoClient.Database(m.DbName).Collection(m.CollectionName)
+
+	document := bson.M{
+		"foo": data,
+	}
+	if _, err := collection.InsertOne(ctx, document); err != nil {
+		return err
+	}
+	return nil
 }

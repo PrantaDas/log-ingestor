@@ -13,6 +13,7 @@ type Config struct {
 	KafkaGroupID   string
 	MongoDBURI     string
 	CollectionName string
+	DBName         string
 }
 
 func init() {
@@ -29,6 +30,7 @@ func LoadConfig() *Config {
 		KafkaGroupID:   getEnv("KAFKA_GROUP_ID", "log_group"),
 		MongoDBURI:     getEnv("MONGODB_URI", "mongodb://mongo:27017"),
 		CollectionName: getEnv("COLLECTION_NAME", "errors"),
+		DBName:         getEnv("DB_NAME", "log-ingester"),
 	}
 }
 
