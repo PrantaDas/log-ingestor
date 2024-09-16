@@ -24,6 +24,12 @@ type Repository interface {
 
 func ConnectToMongoDB(ctx context.Context, config *config.Config) (*MongoDB, error) {
 	client, err := mongo.Connect(options.Client().ApplyURI(config.MongoDBURI))
+	defer func() {
+		if err := client.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
+
 	if err != nil {
 		return nil, err
 	}
