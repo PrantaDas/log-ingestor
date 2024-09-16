@@ -15,7 +15,7 @@ type KafkaConsumer struct {
 }
 
 type Consumer interface {
-	StartConsuming(ctx context.Context, msgHandler func(msg *kafka.Message))
+	StartConsuming(ctx context.Context, msgHandler func(ctx context.Context, msg *kafka.Message, db *db.MongoDB))
 	Close() error
 }
 
@@ -40,16 +40,16 @@ func NewKafkaConsumer(broker string, groupID string, topics []string, db *db.Mon
 	}, nil
 }
 
-func (k *KafkaConsumer) StartConsuming(ctx context.Context, msgHandler func(msg *kafka.Message)) {
+func (c *KafkaConsumer) StartConsuming(ctx context.Context, msgHandler func(tx context.Context, msg *kafka.Message, db *db.MongoDB)) {
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			default:
-				msg, err := k.consumer.ReadMessage(time.Second)
+				msg, err := c.consumer.ReadMessage(time.Second)
 				if err == nil {
-					msgHandler(msg)
+					msgHandler(ctx, msg, c.db)
 				} else {
 					log.Printf("Consumer error: %v", err)
 				}
