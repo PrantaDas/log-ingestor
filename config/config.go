@@ -19,7 +19,7 @@ type Config struct {
 func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		log.Fatalf("Failed to load environment variables: %v", err)
 	}
 }
 
