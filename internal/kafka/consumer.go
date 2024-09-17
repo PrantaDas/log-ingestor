@@ -40,7 +40,7 @@ func NewKafkaConsumer(broker string, groupID string, topics []string, db *db.Mon
 	}, nil
 }
 
-func (c *KafkaConsumer) StartConsuming(ctx context.Context, msgHandler func(tx context.Context, msg *kafka.Message, db *db.MongoDB)) {
+func (c *KafkaConsumer) StartConsuming(ctx context.Context, msgHandler func(ctx context.Context, msg *kafka.Message, db *db.MongoDB)) {
 	go func() {
 		for {
 			select {
