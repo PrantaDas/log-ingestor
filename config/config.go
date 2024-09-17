@@ -3,7 +3,6 @@ package config
 import (
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -15,7 +14,7 @@ type Config struct {
 	MongoDBURI     string
 	CollectionName string
 	DBName         string
-	Port           int
+	Port           string
 }
 
 func init() {
@@ -26,10 +25,6 @@ func init() {
 }
 
 func LoadConfig() *Config {
-	port, err := strconv.Atoi(os.Getenv("PORT"))
-	if err != nil {
-		log.Fatal("Invalid PORT environment variable")
-	}
 	return &Config{
 		KafkaBroker:    getEnv("KAFKA_BROKER", "localhost:9092"),
 		KafkaTopic:     getEnv("KAFKA_TOPIC", "error_logs"),
@@ -37,7 +32,7 @@ func LoadConfig() *Config {
 		MongoDBURI:     getEnv("MONGODB_URI", "mongodb://mongo:27017"),
 		CollectionName: getEnv("COLLECTION_NAME", "errors"),
 		DBName:         getEnv("DB_NAME", "log-ingester"),
-		Port:           port,
+		Port:           getEnv("PORT", "8080"),
 	}
 }
 

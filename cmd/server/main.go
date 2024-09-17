@@ -67,6 +67,14 @@ func main() {
 		w.Write([]byte("Sucess"))
 	})
 
+	log.Printf("Starting HTTP Server on port %s...\n", config.Port)
+	server := &http.Server{
+		Handler: router,
+		Addr:    fmt.Sprintf("127.0.0.1:%s", config.Port),
+	}
+
+	log.Fatal(server.ListenAndServe())
+
 	<-ctx.Done()
 	log.Println("Shutting down HTTP Server gracefully...")
 }
