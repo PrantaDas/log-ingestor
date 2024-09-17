@@ -31,5 +31,5 @@ func main() {
 	consuemer.StartConsuming(ctx, utils.MessagHandler)
 
 	<-ctx.Done()
-	log.Println("Shuttiing down gracefully...")
+	log.Println("Shuttiing down Consumer gracefully...")
 }

@@ -7,7 +7,9 @@ import (
 	"log-ingester/config"
 	"log-ingester/internal/kafka"
 	"net/http"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -31,7 +33,8 @@ const (
 )
 
 func main() {
-
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 	config := config.LoadConfig()
 
 	kafkaProducer, err := kafka.NewKafkaProducer(config.KafkaBroker, config.KafkaTopic)
@@ -64,6 +67,8 @@ func main() {
 		w.Write([]byte("Sucess"))
 	})
 
+	<-ctx.Done()
+	log.Println("Shutting down HTTP Server gracefully...")
 }
 
 func errHandler(ctx context.Context) {
