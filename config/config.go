@@ -26,10 +26,10 @@ func init() {
 
 func LoadConfig() *Config {
 	return &Config{
-		KafkaBroker:    getEnv("KAFKA_BROKER", "localhost:9092"),
+		KafkaBroker:    getEnv("KAFKA_BROKER", "localhost:31001"),
 		KafkaTopic:     getEnv("KAFKA_TOPIC", "error_logs"),
 		KafkaGroupID:   getEnv("KAFKA_GROUP_ID", "log_group"),
-		MongoDBURI:     getEnv("MONGODB_URI", "mongodb://mongo:27017"),
+		MongoDBURI:     getEnv("MONGODB_URI", "mongodb://localhost:27017"),
 		CollectionName: getEnv("COLLECTION_NAME", "errors"),
 		DBName:         getEnv("DB_NAME", "log-ingester"),
 		Port:           getEnv("PORT", "8080"),

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"log-ingester/internal/db"
-	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -42,12 +41,13 @@ func NewKafkaConsumer(broker string, groupID string, topics []string, db *db.Mon
 
 func (c *KafkaConsumer) StartConsuming(ctx context.Context, msgHandler func(ctx context.Context, msg *kafka.Message, db *db.MongoDB)) {
 	go func() {
+		defer c.Close()
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			default:
-				msg, err := c.consumer.ReadMessage(time.Second)
+				msg, err := c.consumer.ReadMessage(-1)
 				if err == nil {
 					msgHandler(ctx, msg, c.db)
 				} else {

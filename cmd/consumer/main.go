@@ -26,8 +26,6 @@ func main() {
 		log.Fatalf("Error creating Kafka consumer: %v", err)
 	}
 
-	defer consuemer.Close()
-
 	consuemer.StartConsuming(ctx, utils.MessagHandler)
 
 	<-ctx.Done()

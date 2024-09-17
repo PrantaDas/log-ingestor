@@ -49,7 +49,7 @@ func (p *KafkaProducer) PushLog(ctx context.Context, message map[string]interfac
 }
 
 func (p *KafkaProducer) Close() error {
-	p.producer.Flush(15 * 1000)
+	p.producer.Flush(1 * 1000)
 	p.producer.Close()
 	return nil
 }
