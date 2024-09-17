@@ -1,1 +1,1 @@
-package consumer
+package main
