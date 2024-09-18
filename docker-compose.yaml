@@ -17,11 +17,11 @@ services:
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
     healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server=localhost:9092", "--list" ]
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server=kafka:9092", "--list" ]
       start_period: 15s
       interval: 10s
     networks:
@@ -58,47 +58,47 @@ services:
       - mongo-data:/data/db
     networks:
       - log-ingestor
-  # server:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.producer
-  #   depends_on:
-  #     - kafka
-  #     - zookeeper
-  #     - kafka-connect
-  #   ports:
-  #     - 8080:8080
-  #   environment:
-  #     - KAFKA_BROKER=kafka:9092
-  #     - KAFKA_TOPIC=error_logs
-  #     - KAFKA_GROUP_ID=log_group
-  #     - MONGODB_URI=mongodb://mongo:27017
-  #     - COLLECTION_NAME=errors
-  #     - DB_NAME=ingester
-  #     - PORT=8080
-  #   networks:
-  #     - log-ingestor
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    depends_on:
+      - kafka
+      - zookeeper
+      - kafka-connect
+    ports:
+      - 8080:8080
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=error_logs
+      - KAFKA_GROUP_ID=log_group
+      - MONGODB_URI=mongodb://mongo:27017
+      - COLLECTION_NAME=errors
+      - DB_NAME=ingester
+      - PORT=8080
+    networks:
+      - log-ingestor
 
-  # consumer:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.consumer
-  #   depends_on:
-  #     - kafka
-  #     - zookeeper
-  #     - kafka-connect
-  #     - mongo
-  #     - server
-  #   environment:
-  #     - KAFKA_BROKER=kafka:9092
-  #     - KAFKA_TOPIC=error_logs
-  #     - KAFKA_GROUP_ID=log_group
-  #     - MONGODB_URI=mongodb://mongo:27017
-  #     - COLLECTION_NAME=errors
-  #     - DB_NAME=ingester
-  #     - PORT=8080
-  #   networks:
-  #     - log-ingestor
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
+    depends_on:
+      - kafka
+      - zookeeper
+      - kafka-connect
+      - mongo
+      - server
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=error_logs
+      - KAFKA_GROUP_ID=log_group
+      - MONGODB_URI=mongodb://mongo:27017
+      - COLLECTION_NAME=errors
+      - DB_NAME=ingester
+      - PORT=8080
+    networks:
+      - log-ingestor
 
 volumes:
   mongo-data:
