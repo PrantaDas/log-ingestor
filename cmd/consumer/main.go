@@ -14,6 +14,7 @@ import (
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
 	config := config.LoadConfig()
 
 	db, err := db.ConnectToMongoDB(ctx, config)
@@ -26,6 +27,7 @@ func main() {
 		log.Fatalf("Error creating Kafka consumer: %v", err)
 	}
 
+	log.Println("Kafka consumer started, waiting for message...")
 	consuemer.StartConsuming(ctx, utils.MessagHandler)
 
 	<-ctx.Done()

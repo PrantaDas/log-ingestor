@@ -3,6 +3,8 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -18,6 +20,33 @@ type Producer interface {
 }
 
 func NewKafkaProducer(broker string, topic string) (*KafkaProducer, error) {
+	a, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.servers": broker})
+
+	if err != nil {
+		return nil, err
+	}
+	defer a.Close()
+
+	durarion, err := time.ParseDuration("60s")
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	res, err := a.CreateTopics(ctx, []kafka.TopicSpecification{{
+		Topic:             topic,
+		NumPartitions:     1,
+		ReplicationFactor: 1,
+	}},
+		kafka.SetAdminOperationTimeout(durarion))
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Successfully created topic", res)
+
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 
 	if err != nil {

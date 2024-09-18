@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"log-ingester/config"
+	"log-ingester/pkg"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -24,11 +25,6 @@ type Repository interface {
 
 func ConnectToMongoDB(ctx context.Context, config *config.Config) (*MongoDB, error) {
 	client, err := mongo.Connect(options.Client().ApplyURI(config.MongoDBURI))
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
 
 	if err != nil {
 		return nil, err
@@ -50,11 +46,15 @@ func ConnectToMongoDB(ctx context.Context, config *config.Config) (*MongoDB, err
 	}, nil
 }
 
-func (m *MongoDB) InsertLogToDB(ctx context.Context, data string) error {
+func (m *MongoDB) InsertLogToDB(ctx context.Context, data pkg.Message) error {
 	collection := m.MongoClient.Database(m.DbName).Collection(m.CollectionName)
 
 	document := bson.M{
-		"foo": data,
+		"requestId":      data.ID,
+		"error":          data.Error,
+		"source":         data.Source,
+		"additionalInfo": data.AdditionalInfo,
+		"timestamp":      time.Now().UTC(),
 	}
 	if _, err := collection.InsertOne(ctx, document); err != nil {
 		return err

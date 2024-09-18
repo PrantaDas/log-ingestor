@@ -32,6 +32,7 @@ services:
     image: confluentinc/cp-kafka-connect:latest
     depends_on:
       - kafka
+      - zookeeper
     ports:
       - "8083:8083"
     environment:
@@ -57,13 +58,14 @@ services:
       - mongo-data:/data/db
     networks:
       - log-ingestor
-  # producer:
+  # server:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile.producer
   #   depends_on:
   #     - kafka
-  #     - mongo
+  #     - zookeeper
+  #     - kafka-connect
   #   ports:
   #     - 8080:8080
   #   environment:
@@ -75,7 +77,7 @@ services:
   #     - DB_NAME=ingester
   #     - PORT=8080
   #   networks:
-  #     - app-network
+  #     - log-ingestor
 
   # consumer:
   #   build:
@@ -83,7 +85,10 @@ services:
   #     dockerfile: Dockerfile.consumer
   #   depends_on:
   #     - kafka
+  #     - zookeeper
+  #     - kafka-connect
   #     - mongo
+  #     - server
   #   environment:
   #     - KAFKA_BROKER=kafka:9092
   #     - KAFKA_TOPIC=error_logs
@@ -93,7 +98,7 @@ services:
   #     - DB_NAME=ingester
   #     - PORT=8080
   #   networks:
-  #     - app-network
+  #     - log-ingestor
 
 volumes:
   mongo-data:

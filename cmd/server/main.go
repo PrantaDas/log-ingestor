@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -45,19 +46,19 @@ func main() {
 
 	router.HandleFunc("/simulate-error", func(w http.ResponseWriter, r *http.Request) {
 		err := simulatError()
-		// reqOption := &Request{
-		// 	Options: &RequestOption{
-		// 		KafkaProducer: kafkaProducer,
-		// 	},
-		// }
+		reqOption := &Request{
+			Options: &RequestOption{
+				KafkaProducer: kafkaProducer,
+			},
+		}
 
 		if err != nil {
 			// reqOption.mu.Lock()
 			// defer reqOption.mu.Unlock()
-			// reqOption.Options.Err = err
-			// reqOption.Options.RequestId = uuid.New().String()
-			// ctx := context.WithValue(r.Context(), optionKey, reqOption)
-			// errHandler(ctx)
+			reqOption.Options.Err = err
+			reqOption.Options.RequestId = uuid.New().String()
+			ctx := context.WithValue(r.Context(), optionKey, reqOption)
+			errHandler(ctx)
 			http.Error(w, "An error occurred while processing request", http.StatusInternalServerError)
 		}
 		w.WriteHeader(http.StatusOK)
@@ -84,17 +85,18 @@ func errHandler(ctx context.Context) {
 	reqOption.mu.Lock()
 	defer reqOption.mu.Unlock()
 	if reqOption.Options.Err != nil {
-		// kafkaProducer := reqOption.Options.KafkaProducer
-		// message := map[string]interface{}{
-		// 	"requestId":    reqOption.Options.RequestId,
-		// 	"error":        reqOption.Options.Err.Error(),
-		// 	"source":       "HTTP Server",
-		// 	"additionInfo": "Dummy Additional Info",
-		// }
-		// err := kafkaProducer.PushLog(ctx, message)
-		// if err != nil {
-		// 	log.Printf("Error pushing error log to Kafka: %v", err)
-		// }
+		kafkaProducer := reqOption.Options.KafkaProducer
+		message := map[string]interface{}{
+			"requestId":    reqOption.Options.RequestId,
+			"error":        reqOption.Options.Err.Error(),
+			"source":       "HTTP Server",
+			"additionInfo": "Dummy Additional Info",
+		}
+		err := kafkaProducer.PushLog(ctx, message)
+		if err != nil {
+			log.Printf("Error pushing error log to Kafka: %v", err)
+		}
+		log.Println("Successfully pushed log to Kafka")
 	}
 }
 
