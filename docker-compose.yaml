@@ -58,6 +58,7 @@ services:
       - mongo-data:/data/db
     networks:
       - log-ingestor
+
   server:
     build:
       context: .
